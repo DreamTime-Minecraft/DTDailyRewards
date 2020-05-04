@@ -1,0 +1,12 @@
+name: DTDailyRewards
+version: ${project.version}
+main: su.dreamtime.dailyrewards.DailyRewards
+api-version: 1.13
+depend: [DreamTimeAPI]
+commands:
+  dailyrewards:
+    aliases: [dailyreward, daily, rewards, reward]
+    permission: dailyreward.main
+permissions:
+  dailyreward.main:
+    default: true
