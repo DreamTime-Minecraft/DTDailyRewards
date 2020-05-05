@@ -34,7 +34,11 @@ public class PlayerReward {
         }
         if (player.hasPermission(reward.getPermission())) {
             Timestamp last = lastTakeTime.get(rewardId);
-            if (last == null || last.getTime() - now.getTime() > reward.getCoolDownMills()) {
+            long time = 0;
+            if (last != null) {
+                time = last.getTime() + reward.getCoolDownMills() - now.getTime();
+            }
+            if (time < 0) {
                 reward.give(player);
                 lastTakeTime.put(rewardId, now);
                 RewardManager.savePlayer(player);
