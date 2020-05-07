@@ -38,7 +38,7 @@ public class PlayerReward {
             if (last != null) {
                 time = last.getTime() + reward.getCoolDownMills() - now.getTime();
             }
-            if (time < 0) {
+            if (time <= 0) {
                 reward.give(player);
                 lastTakeTime.put(rewardId, now);
                 RewardManager.savePlayer(player);
