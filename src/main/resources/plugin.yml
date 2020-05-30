@@ -1,7 +1,7 @@
 name: DTDailyRewards
 version: ${project.version}
 main: su.dreamtime.dailyrewards.DailyRewards
-api-version: 1.13
+api-version: 1.12
 depend: [DreamTimeAPI]
 commands:
   dailyrewards:

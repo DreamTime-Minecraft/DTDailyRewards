@@ -3,6 +3,7 @@ package su.dreamtime.dailyrewards.reward;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 import su.dreamtime.dailyrewards.util.DRTimeUnit;
 
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ public class Reward {
     private char guiChar;
     private Material material;
     private List<String> description = new ArrayList<>();
-
-    public Reward(String title, String permission, long coolDown, DRTimeUnit timeUnit, List<String> commands, char guiChar, Material material, List<String> description) {
+    private MaterialData matData;
+    public Reward(String title, String permission, long coolDown, DRTimeUnit timeUnit, List<String> commands, char guiChar, Material material, List<String> description, MaterialData data) {
         this.title = title;
         this.permission = permission;
         this.coolDown = coolDown;
@@ -27,6 +28,7 @@ public class Reward {
         this.guiChar = guiChar;
         this.material = material;
         this.description = description;
+        this.matData = data;
     }
 
     public String getTitle() {
@@ -75,5 +77,9 @@ public class Reward {
         long cd = coolDown;
         cd *= timeUnit.getFactor();
         return cd;
+    }
+
+    public MaterialData getMatData() {
+        return matData;
     }
 }

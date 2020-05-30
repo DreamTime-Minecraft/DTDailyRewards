@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 import ru.sgk.dreamtimeapi.gui.GUIInventory;
 import ru.sgk.dreamtimeapi.gui.GUIItem;
 import ru.sgk.dreamtimeapi.gui.GUIManager;
@@ -48,13 +49,20 @@ public class RewardManager {
             List<String> commands = rewardsSection.getStringList(rewardId+".commands");
             char guiChar = rewardsSection.getString(rewardId+".gui-char").charAt(0);
             String materialString = rewardsSection.getString(rewardId+".gui-item");
-            Material material = Material.valueOf(materialString.toUpperCase());
+            String[] data = materialString.split(":");
+
+            Material material = Material.matchMaterial(data[0]);
+            MaterialData md = new MaterialData(material);
+            if (data.length > 1) {
+                md.setData(Byte.parseByte(data[1]));
+            }
+
             List<String> tmp = rewardsSection.getStringList(rewardId + ".description");
             List<String> description = new ArrayList<>();
             for (String s : tmp) {
                 description.add(ChatColor.translateAlternateColorCodes('&', s));
             }
-            Reward reward = new Reward(title, permission, coolDown, tUnit, commands, guiChar, material, description);
+            Reward reward = new Reward(title, permission, coolDown, tUnit, commands, guiChar, material, description, md);
             rewards.put(rewardId, reward);
         }
     }
@@ -108,12 +116,19 @@ public class RewardManager {
         GUIManager manager = new GUIManager(plugin);
         GUIInventory inv = manager.addInventory(inventoryTitle, guiChars.size());
         ConfigurationSection otherItemsSect = plugin.getMainConfig().getConfig().getConfigurationSection("items");
-        Map<Character, Material> otherItems = new HashMap<>();
+        Map<Character, MaterialData> otherItems = new HashMap<>();
         for (String s : otherItemsSect.getValues(false).keySet()) {
             char guiChar = otherItemsSect.getString(s + ".gui-char").charAt(0);
             String matStr = otherItemsSect.getString(s + ".gui-item");
-            Material mat = Material.valueOf(matStr.toUpperCase());
-            otherItems.put(guiChar, mat);
+
+            String[] data = matStr.split(":");
+
+            MaterialData material = new MaterialData(Material.matchMaterial(data[0]));
+            if (data.length > 1) {
+                material.setData(Byte.parseByte(data[1]));
+            }
+
+            otherItems.put(guiChar, material );
         }
         int x = 1;
         int y = 1;
@@ -122,9 +137,11 @@ public class RewardManager {
             for (char c : s.toCharArray()) {
                 if (y > 9) break;
                 boolean cont = false;
-                for (Map.Entry<Character, Material> entry : otherItems.entrySet()) {
+                for (Map.Entry<Character, MaterialData> entry : otherItems.entrySet()) {
                     if (entry.getKey() == c) {
-                        GUIItem item = inv.addItem(new ItemStack(entry.getValue()), x, y);
+                        Material mat = entry.getValue().getItemType();
+                        ItemStack is = new ItemStack(mat, 1, (short)0, entry.getValue().getData());
+                        GUIItem item = inv.addItem(is, x, y);
                         item.setTitle("");
                         item.setLore(null);
                         item.createHandler(e -> e.setCancelled(true));
@@ -134,7 +151,11 @@ public class RewardManager {
                 for (Map.Entry<String, Reward> entry: rewards.entrySet()) {
                     Reward r = entry.getValue();
                     if (c == r.getGuiChar()) {
-                        GUIItem item = inv.addItem(new ItemStack(r.getMaterial()), x, y);
+
+                        Material mat = entry.getValue().getMatData().getItemType();
+                        ItemStack is = new ItemStack(mat, 1, (short)0, entry.getValue().getMatData().getData());
+
+                        GUIItem item = inv.addItem(is, x, y);
                         item.setTitle(entry.getKey());
                         item.setLore(r.getDescription());
                         item.createHandler((event) -> {
