@@ -1,9 +1,5 @@
 package su.dreamtime.dailyrewards;
 
-import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sgk.dreamtimeapi.io.ConfigWrapper;
 import su.dreamtime.dailyrewards.command.DailyRewardsCommand;
