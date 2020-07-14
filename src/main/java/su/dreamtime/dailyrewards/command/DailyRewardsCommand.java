@@ -15,13 +15,24 @@ public class DailyRewardsCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (command.getName().equalsIgnoreCase("dailyrewards")) {
-            if (args.length > 0) {
+            if (args.length == 0) {
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.RED + "Вы должны быть игроком");
+                    return true;
+                }
+                Player p = (Player) sender;
+                RewardManager.getInv().open(p);
+            }
+            else {
                 if (args[0].equalsIgnoreCase("reload")) {
-                    if (sender.hasPermission("dailyrewards.reload")) {
+                    if (sender.hasPermission("dailyrewards.admin")) {
                         RewardManager.reload();
+                        sender.sendMessage(ChatColor.GREEN + "Плагин перезагружен");
+                        return true;
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Недостаточно прав!");
                     }
                 } else if (args[0].equalsIgnoreCase("reset")) {
-
                     if (sender.hasPermission("dailyrewards.reset")) {
                         if (args.length >= 2) {
                             OfflinePlayer off = Bukkit.getOfflinePlayer(args[1]);
@@ -32,13 +43,9 @@ public class DailyRewardsCommand implements CommandExecutor {
                         }
                     }
                 }
-            } else {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(ChatColor.RED + "Вы должны быть игроком");
-                    return true;
+                else {
+                    sender.sendMessage("Неизвестная команда");
                 }
-                Player p = (Player) sender;
-                RewardManager.getInv().open(p);
             }
         }
 

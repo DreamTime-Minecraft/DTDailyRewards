@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 import ru.sgk.dreamtimeapi.gui.GUIInventory;
 import ru.sgk.dreamtimeapi.gui.GUIItem;
 import ru.sgk.dreamtimeapi.gui.GUIManager;
@@ -48,7 +49,7 @@ public class RewardManager {
             List<String> commands = rewardsSection.getStringList(rewardId+".commands");
             char guiChar = rewardsSection.getString(rewardId+".gui-char").charAt(0);
             String materialString = rewardsSection.getString(rewardId+".gui-item");
-            Material material = Material.valueOf(materialString.toUpperCase());
+            MaterialData material = getMaterial(materialString);
             List<String> tmp = rewardsSection.getStringList(rewardId + ".description");
             List<String> description = new ArrayList<>();
             for (String s : tmp) {
@@ -89,10 +90,7 @@ public class RewardManager {
         plugin.getPlayerConfig().forceSave();
         players.clear();
         rewards.clear();
-
-        loadRewards();
-        loadPlayers();
-
+        init(plugin);
     }
 
     public static synchronized void unload() {
@@ -108,11 +106,11 @@ public class RewardManager {
         GUIManager manager = new GUIManager(plugin);
         GUIInventory inv = manager.addInventory(inventoryTitle, guiChars.size());
         ConfigurationSection otherItemsSect = plugin.getMainConfig().getConfig().getConfigurationSection("items");
-        Map<Character, Material> otherItems = new HashMap<>();
+        Map<Character, MaterialData> otherItems = new HashMap<>();
         for (String s : otherItemsSect.getValues(false).keySet()) {
             char guiChar = otherItemsSect.getString(s + ".gui-char").charAt(0);
             String matStr = otherItemsSect.getString(s + ".gui-item");
-            Material mat = Material.valueOf(matStr.toUpperCase());
+            MaterialData mat = getMaterial(matStr);
             otherItems.put(guiChar, mat);
         }
         int x = 1;
@@ -122,9 +120,9 @@ public class RewardManager {
             for (char c : s.toCharArray()) {
                 if (y > 9) break;
                 boolean cont = false;
-                for (Map.Entry<Character, Material> entry : otherItems.entrySet()) {
+                for (Map.Entry<Character, MaterialData> entry : otherItems.entrySet()) {
                     if (entry.getKey() == c) {
-                        GUIItem item = inv.addItem(new ItemStack(entry.getValue()), x, y);
+                        GUIItem item = inv.addItem(new ItemStack(entry.getValue().getItemType(),1, (short) 1, entry.getValue().getData()), x, y);
                         item.setTitle("");
                         item.setLore(null);
                         item.createHandler(e -> e.setCancelled(true));
@@ -134,7 +132,7 @@ public class RewardManager {
                 for (Map.Entry<String, Reward> entry: rewards.entrySet()) {
                     Reward r = entry.getValue();
                     if (c == r.getGuiChar()) {
-                        GUIItem item = inv.addItem(new ItemStack(r.getMaterial()), x, y);
+                        GUIItem item = inv.addItem(new ItemStack(r.getMaterial().getItemType(),1, (short) 1, r.getMaterial().getData()), x, y);
                         item.setTitle(entry.getKey());
                         item.setLore(r.getDescription());
                         item.createHandler((event) -> {
@@ -287,5 +285,17 @@ public class RewardManager {
         }
 
         return String.join(", ", timeStringList.toArray(new String[] {}));
+    }
+    private static MaterialData getMaterial(String string){
+        Material mat = null;
+        String datas[] = string.split("\\:");
+        String matStr = datas[0];
+        byte data = (datas.length > 1) ? Byte.parseByte(datas[1]) : 0;
+        mat = Material.matchMaterial(matStr);
+        if (mat == null) {
+            mat = Material.matchMaterial("LEGACY_" + matStr);
+        }
+        MaterialData matData = new MaterialData(mat, data);
+        return matData;
     }
 }
