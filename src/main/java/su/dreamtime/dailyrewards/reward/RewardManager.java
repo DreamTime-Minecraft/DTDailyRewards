@@ -122,7 +122,13 @@ public class RewardManager {
                 boolean cont = false;
                 for (Map.Entry<Character, MaterialData> entry : otherItems.entrySet()) {
                     if (entry.getKey() == c) {
-                        GUIItem item = inv.addItem(new ItemStack(entry.getValue().getItemType(),1, (short) 1, entry.getValue().getData()), x, y);
+                        Material material = entry.getValue().getItemType();
+                        GUIItem item;
+                        if (material.isLegacy()) {
+                            item = inv.addItem(new ItemStack(material, 1, (short) 1, entry.getValue().getData()), x, y);
+                        } else {
+                            item = inv.addItem(new ItemStack(material, 1), x, y);
+                        }
                         item.setTitle("");
                         item.setLore(null);
                         item.createHandler(e -> e.setCancelled(true));
@@ -132,7 +138,14 @@ public class RewardManager {
                 for (Map.Entry<String, Reward> entry: rewards.entrySet()) {
                     Reward r = entry.getValue();
                     if (c == r.getGuiChar()) {
-                        GUIItem item = inv.addItem(new ItemStack(r.getMaterial().getItemType(),1, (short) 1, r.getMaterial().getData()), x, y);
+                        Material material = r.getMaterial().getItemType();
+                        GUIItem item;
+                        if (material.isLegacy()) {
+                            item = inv.addItem(new ItemStack(r.getMaterial().getItemType(),1, (short) 1, r.getMaterial().getData()), x, y);
+
+                        } else {
+                            item = inv.addItem(new ItemStack(r.getMaterial().getItemType(), 1), x, y);
+                        }
                         item.setTitle(entry.getKey());
                         item.setLore(r.getDescription());
                         item.createHandler((event) -> {
